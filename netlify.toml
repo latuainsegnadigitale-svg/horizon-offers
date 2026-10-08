@@ -1,0 +1,5 @@
+# Horizon Offers — configurazione Netlify
+# Sito statico: si pubblica la cartella "public". Nessuna chiave o variabile d'ambiente necessaria.
+[build]
+  publish = "public"
+  command = "echo Nessuna build necessaria"

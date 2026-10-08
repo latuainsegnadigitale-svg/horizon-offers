@@ -1,0 +1,47 @@
+HORIZON OFFERS — pubblicazione con GitHub + Netlify
+
+A COSA SERVE
+  Mostrare al cliente le tre offerte (BASE, STANDARD, PLUS) per l'insegna LED, con accessori,
+  prezzo di listino barrato e prezzo finale al mese + IVA. Marchio Horizon, in collaborazione con JSE.
+
+COSA C'È IN QUESTA CARTELLA
+  netlify.toml        impostazioni per Netlify (nessuna chiave, nessuna variabile d'ambiente)
+  public/             il sito (index.html, icone, manifest, service-worker, robots.txt, _headers)
+
+COME SI USA
+  - Home: tre misure pronte (50x75, 50x100, 75x100). Tocchi la misura, scegli interno o esterno,
+    e si aprono le tre offerte. Con "Modifica" cambi accessori e prezzi su una copia
+    (la misura pronta resta com'è per la volta dopo).
+  - "Crea un'offerta personalizzata": interno/esterno, orientamento, insegna bifacciale,
+    misure, accessori dei tre piani (cerca o crea), prezzi listino e finale.
+  - "Piattaforma creazione spot" è inclusa di serie in tutti e tre i piani.
+  - "Scarica PDF": scarica il preventivo in formato orizzontale, pronto da inviare.
+  - "Salva offerta": resta salvata solo sul telefono o computer con cui la crei.
+  - Da Horizon Render, il tasto "Passa a Horizon Offers" apre questo sito con le misure già inserite.
+
+1) GITHUB (nuovo repository)
+  - Su github.com: "+" in alto a destra > "New repository"
+  - Nome: horizon-offers — scegli "Private" — poi "Create repository"
+  - Nella pagina del repository vuoto clicca "uploading an existing file"
+  - Trascina TUTTO il contenuto di questa cartella (netlify.toml, la cartella public,
+    questo LEGGIMI) in un colpo solo, poi "Commit changes"
+
+2) NETLIFY
+  - "Add new project" > "Import an existing project" > GitHub > scegli horizon-offers > "Deploy"
+  - Project configuration > General > Project name: scrivi horizon-offers
+    L'indirizzo del sito diventa  horizon-offers.netlify.app
+    IMPORTANTE: è l'indirizzo a cui punta il tasto di Horizon Render. Se il nome non è libero
+    e ne scegli un altro, va cambiata la riga OFFERS_URL in Horizon Render (vedi il suo LEGGIMI).
+  - Non servono variabili d'ambiente.
+
+3) SUL TELEFONO
+  - Apri horizon-offers.netlify.app nel browser, poi "Aggiungi a schermata Home":
+    si apre come un'app, con l'icona Horizon.
+
+AGGIORNARE IL SITO GIÀ PUBBLICATO
+  - Su GitHub, nel repository horizon-offers: "Add file" > "Upload files", trascina il contenuto
+    di questa cartella (sovrascrive i file vecchi) e fai un solo "Commit changes". Netlify ripubblica da solo.
+
+NOTE
+  - Il PDF usa la libreria jsPDF caricata da internet: per scaricarlo serve la connessione.
+  - Il sito non compare su Google (noindex): è uno strumento interno per i venditori.
