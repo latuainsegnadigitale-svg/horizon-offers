@@ -1,47 +1,35 @@
-HORIZON OFFERS — pubblicazione con GitHub + Netlify
+HORIZON OFFERS — pubblicazione su Cloudflare
 
 A COSA SERVE
-  Mostrare al cliente le tre offerte (BASE, STANDARD, PLUS) per l'insegna LED, con accessori,
-  prezzo di listino barrato e prezzo finale al mese + IVA. Marchio Horizon, in collaborazione con JSE.
+  Le offerte BASE, STANDARD e PLUS per le insegne LED, in collaborazione con JSE: misure pronte
+  modificabili, offerte personalizzate, bifacciale, accessori ufficiali, prezzo suggerito -10%, PDF.
 
 COSA C'È IN QUESTA CARTELLA
-  netlify.toml        impostazioni per Netlify (nessuna chiave, nessuna variabile d'ambiente)
-  public/             il sito (index.html, icone, manifest, service-worker, robots.txt, _headers)
+  public/          il sito (index.html, logo, icone, ecc.)
+  wrangler.jsonc   le impostazioni per Cloudflare (non serve modificarle)
 
-COME SI USA
-  - Home: tre misure pronte (50x75, 50x100, 75x100). Tocchi la misura, scegli interno o esterno,
-    e si aprono le tre offerte. Con "Modifica" cambi accessori e prezzi su una copia
-    (la misura pronta resta com'è per la volta dopo).
-  - "Crea un'offerta personalizzata": interno/esterno, orientamento, insegna bifacciale,
-    misure, accessori dei tre piani (cerca o crea), prezzi listino e finale.
-  - "Piattaforma creazione spot" è inclusa di serie in tutti e tre i piani.
-  - "Scarica PDF": scarica il preventivo in formato orizzontale, pronto da inviare.
-  - "Salva offerta": resta salvata solo sul telefono o computer con cui la crei.
-  - Da Horizon Render, il tasto "Passa a Horizon Offers" apre questo sito con le misure già inserite.
+PUBBLICARE SU CLOUDFLARE (con GitHub, come Horizon CRM)
+  1) GITHUB
+     - Repository horizon-offers (se esiste già: "Add file" > "Upload files" e trascina il contenuto di questa
+       cartella sopra i file vecchi; se non esiste: "+" > "New repository" > nome horizon-offers > Private).
+     - Trascina TUTTO il contenuto di questa cartella in un colpo solo: wrangler.jsonc e la cartella public.
+     - Se nel repository ci sono ancora netlify.toml o la cartella netlify, puoi cancellarli: non servono più.
+     - "Commit changes".
+  2) CLOUDFLARE
+     - Workers & Pages > Create > "Import a repository" > GitHub > scegli horizon-offers.
+     - Project name: horizon-offers  (deve essere uguale al nome scritto in wrangler.jsonc).
+     - Build command: lascia vuoto. Deploy command: npx wrangler deploy (è già quello proposto).
+     - "Deploy". L'indirizzo diventa  horizon-offers.tolvepaolo6.workers.dev
+     - Questo sito non ha chiavi da inserire.
+  3) AGGIORNAMENTI
+     - Ogni volta che carichi file nuovi su GitHub, Cloudflare ripubblica da solo. Niente crediti.
+  4) NETLIFY
+     - Quando il sito su Cloudflare funziona, su Netlify elimina (o scollega da GitHub) il vecchio sito,
+       altrimenti a ogni caricamento su GitHub Netlify ripubblica e consuma crediti.
+  5) SUL TELEFONO
+     - Apri il nuovo indirizzo, poi "Aggiungi a schermata Home". I lavori salvati con il vecchio indirizzo
+       restano lì: prima di cambiare, scarica i video che ti servono.
 
-1) GITHUB (nuovo repository)
-  - Su github.com: "+" in alto a destra > "New repository"
-  - Nome: horizon-offers — scegli "Private" — poi "Create repository"
-  - Nella pagina del repository vuoto clicca "uploading an existing file"
-  - Trascina TUTTO il contenuto di questa cartella (netlify.toml, la cartella public,
-    questo LEGGIMI) in un colpo solo, poi "Commit changes"
-
-2) NETLIFY
-  - "Add new project" > "Import an existing project" > GitHub > scegli horizon-offers > "Deploy"
-  - Project configuration > General > Project name: scrivi horizon-offers
-    L'indirizzo del sito diventa  horizon-offers.netlify.app
-    IMPORTANTE: è l'indirizzo a cui punta il tasto di Horizon Render. Se il nome non è libero
-    e ne scegli un altro, va cambiata la riga OFFERS_URL in Horizon Render (vedi il suo LEGGIMI).
-  - Non servono variabili d'ambiente.
-
-3) SUL TELEFONO
-  - Apri horizon-offers.netlify.app nel browser, poi "Aggiungi a schermata Home":
-    si apre come un'app, con l'icona Horizon.
-
-AGGIORNARE IL SITO GIÀ PUBBLICATO
-  - Su GitHub, nel repository horizon-offers: "Add file" > "Upload files", trascina il contenuto
-    di questa cartella (sovrascrive i file vecchi) e fai un solo "Commit changes". Netlify ripubblica da solo.
-
-NOTE
-  - Il PDF usa la libreria jsPDF caricata da internet: per scaricarlo serve la connessione.
-  - Il sito non compare su Google (noindex): è uno strumento interno per i venditori.
+COLLEGAMENTO DA HORIZON RENDER
+  Il tasto "Passa a Horizon Offers" di Horizon Render apre questo sito con le misure già inserite:
+  per questo il progetto su Cloudflare deve chiamarsi esattamente horizon-offers.

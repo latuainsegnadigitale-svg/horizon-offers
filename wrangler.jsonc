@@ -1,0 +1,8 @@
+// Configurazione Cloudflare: nome del Worker e cartella del sito. Non serve modificarla.
+{
+  "name": "horizon-offers",
+  "compatibility_date": "2025-10-01",
+  "assets": {
+    "directory": "./public"
+  }
+}
