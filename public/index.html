@@ -548,13 +548,27 @@ function renderBuild(o){
   // prezzo finale suggerito: listino meno il 10% (arrotondato all'euro), da approvare
   const SUGG_DISC = .10;
   const suggOf = list => list == null || !(list > 0) ? null : (list >= 10 ? Math.round(list*(1 - SUGG_DISC)) : Math.round(list*(1 - SUGG_DISC)*100)/100);
+  // e al contrario: listino suggerito = prezzo finale più l'11% (arrotondato all'euro)
+  const SUGG_UP = .11;
+  const listOf = fin => fin == null || !(fin > 0) ? null : (fin >= 10 ? Math.round(fin*(1 + SUGG_UP)) : Math.round(fin*(1 + SUGG_UP)*100)/100);
+  const lastEdit = {};   // per ogni piano: quale campo è stato scritto per ultimo ('list' o 'final')
+  const listSugg = pl => lastEdit[pl.id] === 'final' ? listOf(pl.final) : null;
+  const useList = id => { const pl = o.plans.find(x => x.id === id), v = listOf(pl.final); if (v == null) return; pl.list = v; $('#pl-' + id).value = cm(v); prices(); refreshPreview(); toast('Listino: € ' + money(v) + ' (+11%)'); };
   const useSugg = id => { const pl = o.plans.find(x => x.id === id), v = suggOf(pl.list); if (v == null) return; pl.final = v; $('#pf-' + id).value = cm(v); prices(); refreshPreview(); toast('Prezzo finale: € ' + money(v) + ' (sconto 10%)'); };
+  // quando si crea l'offerta: il listino vuoto si riempie da solo con il prezzo finale più l'11%
+  const fillLists = () => o.plans.forEach(pl => { if (pl.list == null && pl.final != null){ const v = listOf(pl.final); if (v != null){ pl.list = v; const el = $('#pl-' + pl.id); if (el) el.value = cm(v); } } });
   const prices = () => PLANS.forEach(P => {
     const pl = o.plans.find(x => x.id === P.id), el = $('#disc-' + P.id); el.className = 'disc';
-    const sg = suggOf(pl.list), b = $('#sg-' + P.id), fin = $('#pf-' + P.id);
+    const sg = suggOf(pl.list), ls = listSugg(pl), b = $('#sg-' + P.id), fin = $('#pf-' + P.id), lst = $('#pl-' + P.id);
     fin.placeholder = sg != null ? cm(sg) : 'Es. 81';
-    b.hidden = sg == null || pl.final === sg;
-    if (!b.hidden) b.innerHTML = 'Suggerito: <b>€ ' + money(sg) + '</b><small>sconto 10%</small> · Usa';
+    lst.placeholder = listOf(pl.final) != null ? cm(listOf(pl.final)) : 'Es. 90';
+    if (ls != null){
+      b.dataset.mode = 'list'; b.hidden = pl.list === ls;
+      if (!b.hidden) b.innerHTML = 'Listino suggerito: <b>€ ' + money(ls) + '</b><small>+11%</small> · Usa';
+    } else {
+      b.dataset.mode = 'final'; b.hidden = sg == null || pl.final === sg;
+      if (!b.hidden) b.innerHTML = 'Suggerito: <b>€ ' + money(sg) + '</b><small>sconto 10%</small> · Usa';
+    }
     if (pl.list != null && pl.final != null){
       if (pl.final > pl.list){ el.className = 'disc bad'; el.textContent = 'Il prezzo finale è più alto del listino.'; }
       else el.textContent = pl.final < pl.list ? 'Sconto del ' + Math.round((1 - pl.final/pl.list)*100) + '% sul listino' : 'Nessuno sconto sul listino';
@@ -598,10 +612,10 @@ function renderBuild(o){
   $$('.choice[data-k]').forEach(b => b.onclick = () => { o[b.dataset.k] = b.dataset.v; $$('.choice[data-k="' + b.dataset.k + '"]').forEach(x => x.classList.toggle('on', x === b)); dimHint(); refreshPreview(); });
   $('#dbl').onchange = e => { o.double = e.target.checked; dimHint(); refreshPreview(); toast(o.double ? 'Insegna bifacciale' : 'Insegna a una faccia'); };
   ['w','h'].forEach(k => $('#in-' + k).oninput = e => { o[k] = num(e.target.value); dimHint(); refreshPreview(); });
-  $$('[data-p]').forEach(inp => inp.oninput = () => { o.plans.find(x => x.id === inp.dataset.p)[inp.dataset.f] = num(inp.value); prices(); refreshPreview(); });
-  $$('[data-sg]').forEach(b => b.onclick = () => useSugg(b.dataset.sg));
+  $$('[data-p]').forEach(inp => inp.oninput = () => { o.plans.find(x => x.id === inp.dataset.p)[inp.dataset.f] = num(inp.value); lastEdit[inp.dataset.p] = inp.dataset.f; prices(); refreshPreview(); });
+  $$('[data-sg]').forEach(b => b.onclick = () => b.dataset.mode === 'list' ? useList(b.dataset.sg) : useSugg(b.dataset.sg));
   $$('[data-f="final"]').forEach(inp => inp.addEventListener('keydown', e => { if (e.key === 'Enter' && !inp.value.trim()){ e.preventDefault(); useSugg(inp.dataset.p); } }));
-  $$('[data-f="list"]').forEach(inp => inp.addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); const f = $('#pf-' + inp.dataset.p); if (f) f.focus(); } }));
+  $$('[data-f="list"]').forEach(inp => inp.addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); if (!inp.value.trim()){ useList(inp.dataset.p); return; } const f = $('#pf-' + inp.dataset.p); if (f) f.focus(); } }));
   $$('[data-tab]').forEach(b => b.onclick = () => { tab = b.dataset.tab; closeSugg(); renderAcc(); });
   const missing = () => {
     if (!o.env) return 'Scegli se l\'insegna è da interno o da esterno.';
@@ -610,9 +624,9 @@ function renderBuild(o){
     if (o.plans.some(p => p.final == null)) return 'Scrivi il prezzo finale dei tre piani.';
     return '';
   };
-  $('#save').onclick = () => { const m = missing(); if (m){ toast(m); return; } const list = loadSaved().filter(x => x.id !== o.id); list.unshift(o); toast(storeSaved(list) ? 'Offerta salvata' : 'Questo browser non permette di salvare'); };
-  $('#b-pdf').onclick = () => { const m = missing(); if (m){ toast(m); return; } downloadPDF(o); };
-  $('#present').onclick = () => { const m = missing(); if (m){ toast(m); return; } go('show', o); };
+  $('#save').onclick = () => { fillLists(); prices(); refreshPreview(); const m = missing(); if (m){ toast(m); return; } const list = loadSaved().filter(x => x.id !== o.id); list.unshift(o); toast(storeSaved(list) ? 'Offerta salvata' : 'Questo browser non permette di salvare'); };
+  $('#b-pdf').onclick = () => { fillLists(); prices(); refreshPreview(); const m = missing(); if (m){ toast(m); return; } downloadPDF(o); };
+  $('#present').onclick = () => { fillLists(); prices(); refreshPreview(); const m = missing(); if (m){ toast(m); return; } go('show', o); };
   $('#back').onclick = () => go('home');
   dimHint(); prices(); renderAcc(); refreshPreview();
 }
